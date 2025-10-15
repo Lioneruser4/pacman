@@ -7,16 +7,108 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-
       gtag('config', 'UA-142539004-1');
     </script>
 
     <script src='build/app.js'></script>
     <link rel='shortcut icon' type='image/x-icon' href='favicon.ico'>
     <link href='https://fonts.googleapis.com/css?family=Press+Start+2P&display=swap' rel='stylesheet'>
-    <link href='https://fonts.googleapis.com/icon?family=Material+Icons'
-      rel='stylesheet'>
+    <link href='https://fonts.googleapis.com/icon?family=Material+Icons' rel='stylesheet'>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Pacman</title>
+    <style>
+      /* Mobile Controls */
+      .mobile-controls {
+        position: fixed;
+        bottom: 20px;
+        left: 0;
+        right: 0;
+        display: none;
+        justify-content: center;
+        z-index: 1000;
+        touch-action: none;
+      }
+
+      .d-pad {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .d-pad-top, .d-pad-bottom {
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid #fff;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-size: 24px;
+        margin: 5px;
+        user-select: none;
+        touch-action: none;
+      }
+
+      .d-pad-middle {
+        display: flex;
+      }
+
+      .d-pad-left, .d-pad-right {
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid #fff;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-size: 24px;
+        margin: 5px;
+        user-select: none;
+        touch-action: none;
+      }
+
+      /* Mobile styles */
+      @media (max-width: 768px) {
+        body {
+          margin: 0;
+          padding: 0;
+          overflow: hidden;
+          touch-action: none;
+          position: fixed;
+          width: 100%;
+          height: 100%;
+        }
+
+        #overflow-mask {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          transform-origin: top left;
+          overflow: hidden;
+        }
+
+        .mobile-controls {
+          display: flex;
+        }
+
+        canvas {
+          max-width: 100%;
+          height: auto !important;
+          touch-action: none;
+        }
+
+        .game-ui {
+          transform: scale(0.9);
+          transform-origin: top center;
+        }
+      }
+    </style>
   </head>
 
   <body>
@@ -29,7 +121,7 @@
       <div id='main-menu-container' class='main-menu-container'>
         <img id='logo' class='logo' src='app/style/graphics/pacman_logo.png'>
         <button id='game-start' class='game-start'>
-          PLAY
+          OYNA
         </button>
       </div>
 
@@ -45,77 +137,203 @@
       </div>
 
       <div id='paused-text' class='paused-text'>
-        PAUSED
+        DURAKLATILDI
+      </div>
+
+      <div id='game-over-text' class='game-over-text'>
+        OYUN BİTTİ
       </div>
 
       <div id='game-ui' class='game-ui'>
-        <div id='row-top' class='row top'>
+        <div class='top row'>
           <div class='column _25'>
-            <div class='one-up'>1UP</div>
-            <div id='points-display'></div>
+            <div class='score'>1UP</div>
+            <div id='score' class='score-number'>0</div>
           </div>
           <div class='column _50'>
-            <div>HIGH SCORE</div>
-            <div id='high-score-display'></div>
+            <div id='high-score'>EN YÜKSEK SKOR</div>
+            <div id='high-score-number' class='score-number'>0</div>
+          </div>
+          <div class='column _25'>
+            <div class='score'>2UP</div>
+            <div id='score-2' class='score-number'>0</div>
           </div>
         </div>
-
-        <div id='maze' class='maze'>
-          <img id='maze-img' class='maze-img' src='app/style//graphics/spriteSheets/maze/maze_blue.svg'>
-          <div id='maze-cover' class='maze-cover'></div>
-          <div id='dot-container'></div>
-          <p id='pacman' class='pacman'></p>
-          <p id='pacman-arrow' class='pacman'></p>
-          <p id='clyde' class='ghost'></p>
-          <p id='inky' class='ghost'></p>
-          <p id='pinky' class='ghost'></p>
-          <p id='blinky' class='ghost'></p>
-        </div>
-
-      <div id='left-cover' class='loading-cover left'></div>
-      <div id='right-cover' class='loading-cover right'></div>
-      <div id='loading-container' class='loading-container'>
-        <div id='loading-pacman' class='loading-pacman'></div>
-        <div id='loading-dot-mask' class='loading-dot-mask'></div>
-        <div class='loading-dot _5'></div>
-        <div class='loading-dot _10'></div>
-        <div class='loading-dot _15'></div>
-        <div class='loading-dot _20'></div>
-        <div class='loading-dot _25'></div>
-        <div class='loading-dot _30'></div>
-        <div class='loading-dot _35'></div>
-        <div class='loading-dot _40'></div>
-        <div class='loading-dot _45'></div>
-        <div class='loading-dot _50'></div>
-        <div class='loading-dot _55'></div>
-        <div class='loading-dot _60'></div>
-        <div class='loading-dot _65'></div>
-        <div class='loading-dot _70'></div>
-        <div class='loading-dot _75'></div>
-        <div class='loading-dot _80'></div>
-        <div class='loading-dot _85'></div>
-        <div class='loading-dot _90'></div>
-        <div class='loading-dot _95'></div>
-      </div>
-
-      <div id='error-message' class='error-message'>
-        <div class='header'>
-          <div>OOPS!</div>
-          <div class='error-pacman'></div>
-        </div>
-        <div class='body'>
-          We were unable to load the images/sounds needed to play the game.</br></br>
-
-          This could be due to a poor connection, a strict network policy, or
-          by playing on an unsupported browser.
+        <div class='bottom row'>
+          <div class='extra-lives'>
+            <img class='extra-life' src='app/style/graphics/extra_life.png'>
+            <img class='extra-life' src='app/style/graphics/extra_life.png'>
+            <img class='extra-life' src='app/style/graphics/extra_life.png'>
+          </div>
+          <div class='fruit-display'>
+            <img id='fruit' class='fruit' src='app/style/graphics/blank.png'>
+            <div class='fruit-points'>100</div>
+          </div>
+          <div class='level'>
+            <div>SEVİYE</div>
+            <div id='level-number' class='level-number'>1</div>
+          </div>
         </div>
       </div>
 
-      <script>
-        window.onload = () => {
-          let gameCoordinator = new GameCoordinator();
-        }
-      </script>
+      <div id='ready' class='ready'>
+        HAZIR!
+      </div>
+
+      <canvas id='maze' class='maze' width='224' height='248'></canvas>
+      <canvas id='character-canvas' class='character-canvas' width='224' height='248'></canvas>
+      <canvas id='dot-canvas' class='dot-canvas' width='224' height='248'></canvas>
+      <canvas id='text-canvas' class='text-canvas' width='224' height='248'></canvas>
+      <canvas id='fruit-canvas' class='fruit-canvas' width='224' height='248'></canvas>
+      <canvas id='score-canvas' class='score-canvas' width='224' height='248'></canvas>
+      <canvas id='extra-lives-canvas' class='extra-lives-canvas' width='224' height='248'></canvas>
+      <canvas id='game-over-canvas' class='game-over-canvas' width='224' height='248'></canvas>
+      <canvas id='fps-canvas' class='fps-canvas' width='224' height='248'></canvas>
+      <div id='touch-overlay' class='touch-overlay'></div>
+      
+      <!-- Mobil Kontroller -->
+      <div id='mobile-controls' class='mobile-controls'>
+        <div class='d-pad'>
+          <div class='d-pad-top' id='up-btn'>↑</div>
+          <div class='d-pad-middle'>
+            <div class='d-pad-left' id='left-btn'>←</div>
+            <div class='d-pad-center'></div>
+            <div class='d-pad-right' id='right-btn'>→</div>
+          </div>
+          <div class='d-pad-bottom' id='down-btn'>↓</div>
+        </div>
+      </div>
     </div>
+
+    <script>
+      // Mobil kontroller için dokunma olaylarını ekle
+      document.addEventListener('DOMContentLoaded', function() {
+        // Siren sesini devre dışı bırak
+        if (window.soundManager) {
+          const originalPlaySiren = window.soundManager.playSiren;
+          window.soundManager.playSiren = function() {
+            // Siren sesini oynatma
+            return;
+          };
+          
+          // Mevcut siren seslerini durdur
+          const stopSirens = () => {
+            const audioElements = document.querySelectorAll('audio');
+            audioElements.forEach(audio => {
+              if (audio.src.includes('siren')) {
+                audio.pause();
+                audio.volume = 0;
+              }
+            });
+          };
+          
+          // Oyun başladığında ve her 5 saniyede bir siren seslerini kontrol et
+          setInterval(stopSirens, 5000);
+          
+          // Oyun başladığında da kontrol et
+          document.getElementById('game-start').addEventListener('click', stopSirens);
+        }
+
+        // Mobil cihaz kontrolü
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        if (isMobile) {
+          // Tam ekran yap
+          const requestFullscreen = () => {
+            const element = document.documentElement;
+            if (element.requestFullscreen) {
+              element.requestFullscreen().catch(err => {
+                console.log('Tam ekran hatası:', err);
+              });
+            } else if (element.webkitRequestFullscreen) {
+              element.webkitRequestFullscreen();
+            } else if (element.msRequestFullscreen) {
+              element.msRequestFullscreen();
+            }
+          };
+
+          // Oyun başlat butonuna tıklandığında tam ekran yap
+          document.getElementById('game-start').addEventListener('click', () => {
+            setTimeout(requestFullscreen, 500);
+          });
+
+          // Dokunma olaylarını yönet
+          const upBtn = document.getElementById('up-btn');
+          const downBtn = document.getElementById('down-btn');
+          const leftBtn = document.getElementById('left-btn');
+          const rightBtn = document.getElementById('right-btn');
+
+          const handleTouchStart = (direction) => {
+            const event = new KeyboardEvent('keydown', { 
+              key: `Arrow${direction}`, 
+              keyCode: 37 + ['Right', 'Up', 'Left', 'Down'].indexOf(direction),
+              which: 37 + ['Right', 'Up', 'Left', 'Down'].indexOf(direction)
+            });
+            document.dispatchEvent(event);
+          };
+
+          const handleTouchEnd = (direction) => {
+            const event = new KeyboardEvent('keyup', { 
+              key: `Arrow${direction}`,
+              keyCode: 37 + ['Right', 'Up', 'Left', 'Down'].indexOf(direction),
+              which: 37 + ['Right', 'Up', 'Left', 'Down'].indexOf(direction)
+            });
+            document.dispatchEvent(event);
+          };
+
+          // Dokunma olaylarını ekle
+          upBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            handleTouchStart('Up');
+          });
+          upBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            handleTouchEnd('Up');
+          });
+
+          downBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            handleTouchStart('Down');
+          });
+          downBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            handleTouchEnd('Down');
+          });
+
+          leftBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            handleTouchStart('Left');
+          });
+          leftBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            handleTouchEnd('Left');
+          });
+
+          rightBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            handleTouchStart('Right');
+          });
+          rightBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            handleTouchEnd('Right');
+          });
+
+          // Ekran boyutunu ayarla
+          function resizeGame() {
+            const gameContainer = document.getElementById('overflow-mask');
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const scale = Math.min(width / 224, height / 300) * 0.9;
+            
+            gameContainer.style.transform = `scale(${scale})`;
+            gameContainer.style.marginLeft = `${(width - 224 * scale) / 2}px`;
+            gameContainer.style.marginTop = `${(height - 300 * scale) / 2}px`;
+          }
+
+          window.addEventListener('resize', resizeGame);
+          resizeGame();
+        }
+      });
+    </script>
   </body>
 </html>
