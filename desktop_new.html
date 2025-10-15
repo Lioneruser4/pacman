@@ -73,39 +73,54 @@
 
       /* Mobile styles */
       @media (max-width: 768px) {
-        body {
+        html, body {
           margin: 0;
           padding: 0;
-          overflow: hidden;
-          touch-action: none;
-          position: fixed;
           width: 100%;
           height: 100%;
+          overflow: hidden;
+          touch-action: none;
+          -webkit-overflow-scrolling: touch;
+          position: fixed;
         }
-
+        
         #overflow-mask {
           position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          transform-origin: top left;
-          overflow: hidden;
+          top: 50%;
+          left: 50%;
+          width: 100vmax;
+          height: 100vmax;
+          transform: translate(-50%, -50%) scale(0.9);
+          margin: 0;
+          padding: 0;
         }
-
+        
         .mobile-controls {
+          position: fixed;
+          bottom: 10px;
+          left: 0;
+          right: 0;
           display: flex;
-        }
-
-        canvas {
-          max-width: 100%;
-          height: auto !important;
-          touch-action: none;
-        }
-
-        .game-ui {
+          justify-content: center;
+          z-index: 1000;
           transform: scale(0.9);
-          transform-origin: top center;
+          transform-origin: bottom center;
+        }
+        
+        /* Oyun alanını büyüt */
+        .maze, 
+        .character-canvas, 
+        .dot-canvas, 
+        .text-canvas, 
+        .fruit-canvas, 
+        .score-canvas, 
+        .extra-lives-canvas, 
+        .game-over-canvas, 
+        .fps-canvas {
+          width: 100% !important;
+          height: auto !important;
+          max-width: none !important;
+          max-height: none !important;
         }
       }
     </style>
@@ -206,35 +221,21 @@
     </div>
 
     <script>
-      // Mobil kontroller için dokunma olaylarını ekle
-      document.addEventListener('DOMContentLoaded', function() {
-        // Siren sesini devre dışı bırak
-        if (window.soundManager) {
-          const originalPlaySiren = window.soundManager.playSiren;
-          window.soundManager.playSiren = function() {
-            // Siren sesini oynatma
-            return;
-          };
-          
-          // Mevcut siren seslerini durdur
-          const stopSirens = () => {
-            const audioElements = document.querySelectorAll('audio');
-            audioElements.forEach(audio => {
-              if (audio.src.includes('siren')) {
-                audio.pause();
-                audio.volume = 0;
-              }
-            });
-          };
-          
-          // Oyun başladığında ve her 5 saniyede bir siren seslerini kontrol et
-          setInterval(stopSirens, 5000);
-          
-          // Oyun başladığında da kontrol et
-          document.getElementById('game-start').addEventListener('click', stopSirens);
-        }
+      // Siren sesini devre dışı bırak
+      if (window.soundManager) {
+        window.soundManager.playSiren = function() {};
+        setInterval(() => {
+          document.querySelectorAll('audio').forEach(audio => {
+            if (audio.src.includes('siren')) {
+              audio.pause();
+              audio.volume = 0;
+            }
+          });
+        }, 1000);
+      }
 
-        // Mobil cihaz kontrolü
+      // Mobil kontroller
+      document.addEventListener('DOMContentLoaded', function() {
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         
         if (isMobile) {
@@ -242,9 +243,7 @@
           const requestFullscreen = () => {
             const element = document.documentElement;
             if (element.requestFullscreen) {
-              element.requestFullscreen().catch(err => {
-                console.log('Tam ekran hatası:', err);
-              });
+              element.requestFullscreen().catch(console.log);
             } else if (element.webkitRequestFullscreen) {
               element.webkitRequestFullscreen();
             } else if (element.msRequestFullscreen) {
@@ -258,22 +257,8 @@
           });
 
           // Dokunma olaylarını yönet
-          const upBtn = document.getElementById('up-btn');
-          const downBtn = document.getElementById('down-btn');
-          const leftBtn = document.getElementById('left-btn');
-          const rightBtn = document.getElementById('right-btn');
-
-          const handleTouchStart = (direction) => {
-            const event = new KeyboardEvent('keydown', { 
-              key: `Arrow${direction}`, 
-              keyCode: 37 + ['Right', 'Up', 'Left', 'Down'].indexOf(direction),
-              which: 37 + ['Right', 'Up', 'Left', 'Down'].indexOf(direction)
-            });
-            document.dispatchEvent(event);
-          };
-
-          const handleTouchEnd = (direction) => {
-            const event = new KeyboardEvent('keyup', { 
+          const handleTouch = (direction, type) => {
+            const event = new KeyboardEvent(`key${type}`, { 
               key: `Arrow${direction}`,
               keyCode: 37 + ['Right', 'Up', 'Left', 'Down'].indexOf(direction),
               which: 37 + ['Right', 'Up', 'Left', 'Down'].indexOf(direction)
@@ -282,40 +267,18 @@
           };
 
           // Dokunma olaylarını ekle
-          upBtn.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            handleTouchStart('Up');
-          });
-          upBtn.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            handleTouchEnd('Up');
-          });
-
-          downBtn.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            handleTouchStart('Down');
-          });
-          downBtn.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            handleTouchEnd('Down');
-          });
-
-          leftBtn.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            handleTouchStart('Left');
-          });
-          leftBtn.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            handleTouchEnd('Left');
-          });
-
-          rightBtn.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            handleTouchStart('Right');
-          });
-          rightBtn.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            handleTouchEnd('Right');
+          ['up', 'down', 'left', 'right'].forEach(dir => {
+            const btn = document.getElementById(`${dir}-btn`);
+            if (btn) {
+              btn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                handleTouch(dir.charAt(0).toUpperCase() + dir.slice(1), 'down');
+              });
+              btn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                handleTouch(dir.charAt(0).toUpperCase() + dir.slice(1), 'up');
+              });
+            }
           });
 
           // Ekran boyutunu ayarla
@@ -323,7 +286,7 @@
             const gameContainer = document.getElementById('overflow-mask');
             const width = window.innerWidth;
             const height = window.innerHeight;
-            const scale = Math.min(width / 224, height / 300) * 0.9;
+            const scale = Math.min(width / 224, height / 300) * 0.95;
             
             gameContainer.style.transform = `scale(${scale})`;
             gameContainer.style.marginLeft = `${(width - 224 * scale) / 2}px`;
